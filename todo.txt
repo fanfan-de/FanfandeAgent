@@ -1,0 +1,163 @@
+## 0. 项目愿景与技术栈
+*   **目标：** 构建一个轻量级、无黑盒、易于调试的 Python Agent 框架。
+*   **核心哲学：** Explicit is better than implicit（显式优于隐式）。
+*   **技术栈：**
+    *   语言：Python 3.10+ (强类型提示)
+    *   核心依赖：`openai` (官方 SDK), `pydantic` (数据验证), `inspect` (标准库，用于函数解析)。
+    *   **拒绝使用：** LangChain, LlamaIndex (我们要自己造这些轮子)。
+
+---
+
+## 阶段一：地基搭建 (The Wrapper)
+**目标：** 封装大模型 API，实现最基础的对话管理，让代码能跑通。
+
+### 1.1 定义消息结构
+不要直接使用字典，定义自己的类，方便后续扩展。
+*   **任务：** 创建 `Message` 类。
+*   **关键点：** 区分 `UserMessage`, `AIMessage`, `SystemMessage`, `ToolMessage`。
+
+### 1.2 封装 LLM Client
+不要每次都写 `client.chat.completions.create`。
+*   **任务：** 创建 `LLM` 类。
+*   **功能：**
+    *   接收 `List[Message]`。
+    *   处理 API Key。
+    *   返回统一的响应格式。
+
+### ✅ 阶段一验收标准：
+你可以运行类似这样的代码：
+```python
+llm = LLM(model="gpt-4o")
+history = [UserMessage("你好")]
+response = llm.chat(history)
+print(response) # 输出：你好！有什么我可以帮你的吗？
+```
+
+---
+
+## 阶段二：感知的延伸 (The Tool Registry)
+**目标：** 让大模型“看见”你的 Python 函数。这是框架最核心的魔法部分。
+
+### 2.1 实现 Schema 转换器
+大模型只能读懂 JSON Schema，读不懂 Python 代码。你需要写一个“翻译器”。
+*   **任务：** 编写 `function_to_schema(func)` 函数。
+*   **技术难点：**
+    *   使用 `inspect.signature(func)` 获取函数参数。
+    *   读取 Type Hints (`str`, `int`) 映射为 JSON 类型 (`string`, `integer`)。
+    *   读取 `func.__doc__` 作为工具描述。
+
+### 2.2 实现注册装饰器 `@tool`
+*   **任务：** 创建 `Agent` 类，并在其中实现 `register_tool` 逻辑。
+*   **逻辑：**
+    1.  用户用 `@agent.tool` 装饰一个函数。
+    2.  框架自动解析该函数的 Schema。
+    3.  将 函数体（Callable）存入 `self.tool_map` 字典。
+    4.  将 Schema 存入 `self.tool_schemas` 列表。
+
+### ✅ 阶段二验收标准：
+```python
+@agent.tool
+def get_weather(city: str):
+    """查询天气"""
+    return "晴天"
+
+print(agent.tool_schemas)
+# 输出应该是一个标准的 OpenAI Function JSON 格式
+```
+
+---
+
+## 阶段三：核心引擎 (The ReAct Loop)
+**目标：** 实现“思考-行动-观察”的死循环。这是 Agent 的灵魂。
+
+### 3.1 实现单步执行逻辑 `step()`
+*   **任务：** 将 History + Tools 发给 LLM。
+*   **判断：**
+    *   如果 LLM 返回文本 -> 任务结束，返回结果。
+    *   如果 LLM 返回 `tool_calls` -> 进入 3.2。
+
+### 3.2 实现工具执行器
+*   **任务：**
+    1.  解析 LLM 返回的 JSON 参数。
+    2.  从 `self.tool_map` 找到对应的 Python 函数。
+    3.  **执行函数**，捕获返回值。
+    4.  **关键步骤：** 将返回值封装为 `ToolMessage` (role='tool')，追加到 History 中。
+
+### 3.3 实现自动循环 `run()`
+*   **任务：** 用 `while True` 包裹 `step()`。
+*   **安全机制：** 必须设置 `max_turns` (最大轮数)，防止死循环烧钱。
+
+### ✅ 阶段三验收标准：
+```python
+agent.run("查询北京的天气，然后告诉我适合穿什么？")
+# 控制台日志：
+# 1. 🤖 thought: 调用 get_weather(city="北京")
+# 2. ⚙️ exec: get_weather 返回 "零下5度"
+# 3. 🤖 thought: 北京很冷...
+# 4. 🗣️ answer: 北京零下5度，建议穿羽绒服。
+```
+
+---
+
+## 阶段四：记忆与状态 (Memory Management)
+**目标：** 让 Agent 拥有长对话能力，而不被 Token 撑爆。
+
+### 4.1 抽象 Memory 组件
+*   **任务：** 将 `list` 替换为 `Memory` 类。
+*   **功能：** 提供 `add_message()`, `get_messages()` 方法。
+
+### 4.2 实现滑动窗口 (Sliding Window)
+*   **任务：** 当消息数量超过 N 条时，保留 `System Prompt`，删除最早的 `User/AI` 对话，但要确保不会切断 `Tool Call` 和 `Tool Result` 的配对（否则会报错）。
+
+### ✅ 阶段四验收标准：
+与 Agent 连续对话 20 轮，检查发给 API 的 payload，确认没有包含最早的对话，且程序未报错。
+
+---
+
+## 阶段五：可观测性与高级特性 (Observability & Streaming)
+**目标：** 从“能用”变成“好用”，适合生产环境。
+
+### 5.1 增加详细的 Logger
+*   **任务：** 引入 Python 的 `logging` 模块。
+*   **颜色编码：** 绿色的“思考”，黄色的“工具调用”，红色的“错误”。让调试像看黑客帝国代码雨一样清晰。
+
+### 5.2 支持流式输出 (Streaming)
+*   **挑战：** OpenAI 的 Stream 模式下，工具调用的 JSON 是一块一块传回来的。
+*   **任务：** 实现一个 `StreamParser`，能够实时拼接碎片，直到拼凑出一个完整的 JSON，再触发工具执行。
+
+---
+
+## 📂 推荐的项目文件结构
+
+```text
+nano_agent/
+├── __init__.py
+├── core/
+│   ├── llm.py          # LLM API 封装
+│   ├── message.py      # 消息类定义
+│   └── memory.py       # 记忆管理
+├── engine/
+│   ├── agent.py        # 核心循环 (Run Loop)
+│   ├── tool.py         # 装饰器与 Schema 解析器
+│   └── utils.py        # 辅助函数
+├── examples/
+│   ├── demo_weather.py # 天气查询 Demo
+│   └── demo_math.py    # 简单的数学计算 Demo
+└── main.py
+```
+
+---
+
+## 🛠️ 行动建议：第一周做什么？
+
+**Day 1:** 完成 **阶段一**。不需要写 Class，就用一个 Python 脚本，调通 OpenAI API，把 `messages` 列表打印得漂漂亮亮。
+
+**Day 2:** 攻克 **阶段二** 的 Schema 转换。这是最枯燥但最重要的一步。写好 `get_schema(func)` 函数。
+
+**Day 3:** 尝试手动拼接 Tool Call 的过程。不写自动循环，手动模拟：发请求 -> 拿到 JSON -> 运行函数 -> 再发请求。理解这一步，你就理解了 Agent 的本质。
+
+**Day 4:** 将 Day 3 的逻辑封装成 `Agent` 类，完成 **阶段三**。
+
+**Day 5:** 整理代码，写 README，发布到 GitHub。
+
+加油！当你亲手写完 `agent.py` 里的那个 `while` 循环时，你对 AI 的理解将超越 90% 的“调包侠”。
