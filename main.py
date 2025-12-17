@@ -2,6 +2,7 @@ from core.llm import LLM
 from core.message import UserMessage , SystemMessage
 
 def main():
+    text = input("please input:")
     #初始化LLM
     llm = LLM(model="deepseek-chat")
 

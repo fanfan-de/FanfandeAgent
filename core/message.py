@@ -27,12 +27,6 @@ class SystemMessage(Message):
     def __init__(self,content:str,**kwargs):
         super().__init__(role="system",content=content,**kwargs)
 
-    def to_deepseek_dict(self) -> Dict[str, Any]:
-        return {
-            "role": self.role,
-            "content": self.content
-        }
-
 
 #user
 class UserMessage(Message):
