@@ -4,7 +4,6 @@ from core.message import UserMessage, SystemMessage, ToolMessage
 from engine.tool import function_to_schema ,ToolRegistry
 from openai.types.chat import ChatCompletionMessageFunctionToolCall
 from openai.types.chat import ChatCompletionMessageToolCall
-from openai.types.chat import Function
 # ... 其他原有导入
 
 '''
