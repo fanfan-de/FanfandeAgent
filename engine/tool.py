@@ -14,6 +14,7 @@ def get_json_type(py_type):
         dict: "object",
         type(None): "null",
     }
+
     # 如果是更复杂的类型（如 Optional），这里可以扩展逻辑
     # 简单起见，如果找不到映射，默认当做 string 处理
     return type_map.get(py_type, "string")

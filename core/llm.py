@@ -54,7 +54,7 @@ class LLM:
 
             else:
                 # 情况 B: 普通文本回复 -> 保持你原有的封装习惯
-                return LLMMessage(content=response_message.content)
+                return LLMMessage(content=response_message.content,tool_calls = None)
             
         except Exception as e:
             print(f"调用 LLM 出错: {e}")

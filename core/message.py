@@ -27,6 +27,11 @@ class SystemMessage(Message):
     def __init__(self,content:str,**kwargs):
         super().__init__(role="system",content=content,**kwargs)
 
+    def to_deepseek_dict(self) -> Dict[str, Any]:
+        return {
+            "role": self.role,
+            "content": self.content
+    }
 
 #user
 class UserMessage(Message):
@@ -40,15 +45,34 @@ class UserMessage(Message):
     }
 
 #tools
-class ToolMessage(Message):
-    def __init__(self,content:Optional[str],**kwargs):
-        super().__init__(role="tools",content=content,**kwargs)
+# core/message.py
 
+class ToolMessage(Message):
+    tool_call_id: str
+    
+    def __init__(self, content: str, tool_call_id: str):
+        # ⭐ 关键：将 tool_call_id 也传给父类的 __init__
+        super().__init__(role="tool", content=content, tool_call_id=tool_call_id)
+    
+    def to_deepseek_dict(self) -> Dict[str, Any]:
+        return {
+            "role": self.role,
+            "content": self.content,
+            "tool_call_id": self.tool_call_id
+        }
 #llm
 class LLMMessage(Message):
-    def __init__(self,content:Optional[str],**kwargs):
-        super().__init__(role="llm",content=content,**kwargs)
+    tool_calls:str
 
+    def __init__(self,content:str,tool_calls:str):
+        super().__init__(role="assistant",content=content,tool_calls=tool_calls)
+
+    def to_deepseek_dict(self) -> Dict[str, Any]:
+        return {
+            "role": self.role,
+            "content": self.content,
+            "tool_calls":self.tool_calls
+    }
 
 
 #继承 `BaseModel`：** Pydantic 会自动帮我们检查类型。
