@@ -47,16 +47,15 @@ class LLMMessage(Message):
     class ToolCall(BaseModel):
         id: str
         type: str = "function"
-        function: function
+        function: "LLMMessage.function"
 
     tool_calls : Optional[list[ToolCall]]=None
     role: Literal["assistant"] = "assistant"
 
     def to_openai_dict(self):
-        return {
-            "role" : self.role,
-            "content": self.content,
-            "tool_calls":[e.model_dump() for e in self.tool_calls]
+        return {"role" : self.role,
+                "content": self.content,
+                "tool_calls":[e.model_dump() for e in self.tool_calls ] if self.tool_calls else None
         }
     
     @staticmethod
