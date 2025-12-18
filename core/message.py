@@ -4,18 +4,8 @@ from pydantic import BaseModel
 #定义消息基类
 class Message(BaseModel):
     role: str
-    #content 是一个变量
-    #它的类型可以是 str（字符串）或 None
-    #默认值为 None
-    #Optional：来自 typing 模块，表示"可选的"
-    content: Optional[str] = None # content 有可能是空的（比如只调用工具时）
+    content: Optional[str] = None
 
-    # 这一步是为了方便后续转成 OpenAI 需要的字典格式
-    def to_deepseek_dict(self) -> Dict[str, Any]:
-        return {
-            "role": self.role,
-            "content": self.content
-        }
 
     
 
@@ -27,22 +17,13 @@ class SystemMessage(Message):
     def __init__(self,content:str,**kwargs):
         super().__init__(role="system",content=content,**kwargs)
 
-    def to_deepseek_dict(self) -> Dict[str, Any]:
-        return {
-            "role": self.role,
-            "content": self.content
-    }
+
 
 #user
 class UserMessage(Message):
     def __init__(self,content:Optional[str],**kwargs):
         super().__init__(role="user",content=content,**kwargs)
 
-    def to_deepseek_dict(self) -> Dict[str, Any]:
-        return {
-            "role": self.role,
-            "content": self.content
-    }
 
 #tools
 # core/message.py
@@ -54,25 +35,14 @@ class ToolMessage(Message):
         # ⭐ 关键：将 tool_call_id 也传给父类的 __init__
         super().__init__(role="tool", content=content, tool_call_id=tool_call_id)
     
-    def to_deepseek_dict(self) -> Dict[str, Any]:
-        return {
-            "role": self.role,
-            "content": self.content,
-            "tool_call_id": self.tool_call_id
-        }
+
 #llm
 class LLMMessage(Message):
-    tool_calls:str
+    tool_calls:Optional[str] = None
+
 
     def __init__(self,content:str,tool_calls:str):
         super().__init__(role="assistant",content=content,tool_calls=tool_calls)
 
-    def to_deepseek_dict(self) -> Dict[str, Any]:
-        return {
-            "role": self.role,
-            "content": self.content,
-            "tool_calls":self.tool_calls
-    }
 
 
-#继承 `BaseModel`：** Pydantic 会自动帮我们检查类型。

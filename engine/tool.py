@@ -70,8 +70,6 @@ def function_to_schema(func) -> dict:
 
 
 class ToolRegistry:
-
-    
     """工具注册器"""
     def __init__(self):
         self._tools: Dict[str, Dict] = {}

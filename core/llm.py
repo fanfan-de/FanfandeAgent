@@ -5,6 +5,8 @@ from core.message import Message, LLMMessage
 from deepseek import DeepSeekAPI
 from openai import OpenAI
 from openai.types.chat import ChatCompletionMessage
+from rich import print as rprint
+from rich.console import Console
 
 
 #load env
@@ -18,6 +20,7 @@ class LLM:
             api_key=os.environ.get('DEEPSEEK_API_KEY'), 
             base_url="https://api.deepseek.com"
         )
+
     def chat(self,messages:List[Message],tools:Optional[List[Dict]]=None)->Union[LLMMessage,ChatCompletionMessage]:
         """
         核心方法：发送消息列表，获取 AI 回复
@@ -28,7 +31,7 @@ class LLM:
             ## 2. 构造 API 参数
             params = {
                 "model": self.model,
-                "messages": [msg.to_deepseek_dict() for msg in messages],
+                "messages": [msg.model_dump() for msg in messages],
                 "stream": False,
             }
 

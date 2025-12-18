@@ -1,0 +1,217 @@
+太棒了！完成了阶段一，意味着你已经能够像调用普通 API 一样和 LLM 对话了。
+
+**阶段二（The Tool Registry）** 是从“聊天机器人”向“Agent”进化的分水岭。这里我们要解决的核心问题是：**如何把 Python 函数翻译成 LLM 能看懂的 JSON 字典。**
+
+我们将代码拆分为两个核心部分：**Schema 转换器** 和 **Agent 类注册逻辑**。
+
+建议将代码分别放入 `nano_agent/engine/tool.py` 和 `nano_agent/engine/agent.py`（如果暂时不想分文件，写在一个文件里也可以）。
+
+---
+
+### 第一步：编写 Schema 转换器 (`function_to_schema`)
+
+这是最“硬核”的部分。我们需要利用 Python 的 `inspect` 标准库来解剖函数。
+
+在 `nano_agent/engine/tool.py` 中写入以下代码：
+
+```python
+import inspect
+from typing import get_type_hints
+
+def get_json_type(py_type):
+    """
+    将 Python 类型映射为 JSON Schema 类型
+    """
+    type_map = {
+        str: "string",
+        int: "integer",
+        float: "number",
+        bool: "boolean",
+        list: "array",
+        dict: "object",
+        type(None): "null",
+    }
+    # 如果是更复杂的类型（如 Optional），这里可以扩展逻辑
+    # 简单起见，如果找不到映射，默认当做 string 处理
+    return type_map.get(py_type, "string")
+
+def function_to_schema(func) -> dict:
+    """
+    核心魔法：将 Python 函数转换为 OpenAI Function JSON Schema
+    """
+    # 1. 获取函数名和文档
+    name = func.__name__
+    description = (func.__doc__ or "").strip()
+
+    # 2. 解析参数
+    sig = inspect.signature(func)
+    type_hints = get_type_hints(func) # 获取类型提示
+    
+    parameters = {
+        "type": "object",
+        "properties": {},
+        "required": []
+    }
+
+    for param_name, param in sig.parameters.items():
+        # 跳过 self 和 cls (如果是类方法)
+        if param_name == 'self' or param_name == 'cls':
+            continue
+
+        # 获取参数类型
+        annotation = type_hints.get(param_name, str) # 默认为 str
+        json_type = get_json_type(annotation)
+
+        # 构建参数描述
+        parameters["properties"][param_name] = {
+            "type": json_type,
+            "description": f"Parameter {param_name}" # 可以在这里做更多优化，解析 docstring 获取参数说明
+        }
+
+        # 判断是否为必填项 (没有默认值就是必填)
+        if param.default == inspect.Parameter.empty:
+            parameters["required"].append(param_name)
+
+    # 3. 组装最终结构
+    schema = {
+        "type": "function",
+        "function": {
+            "name": name,
+            "description": description,
+            "parameters": parameters,
+        }
+    }
+    return schema
+```
+
+#### 💡 代码解析：
+1.  **`inspect.signature`**: 这是 Python 的内省神器，它能告诉你函数有哪些参数、默认值是什么。
+2.  **`get_type_hints`**: 你的项目要求 Python 3.10+ 强类型，这个函数能提取 `def func(a: int)` 里的 `int`。
+3.  **Required 逻辑**: 如果参数没有默认值（`param.default == empty`），在 JSON Schema 里它就是 `required`，LLM 必须提供；如果有默认值，LLM 可以忽略。
+
+---
+
+### 第二步：构建 Agent 类与注册装饰器
+
+在 `nano_agent/engine/agent.py` 中建立 Agent 的雏形。它需要一个字典来存“真身”，一个列表来存“影子（Schema）”。
+
+```python
+from typing import Callable, List, Dict
+# 假设上面的代码在 tool.py 中，这里导入
+from nano_agent.engine.tool import function_to_schema 
+from nano_agent.core.llm import LLM # 假设你阶段一写的 LLM 类在这里
+
+class Agent:
+    def __init__(self, llm: LLM):
+        self.llm = llm
+        # 核心资产：
+        # 1. tool_map: 存函数本身，等到执行时调用 -> {"get_weather": <func_obj>}
+        self.tool_map: Dict[str, Callable] = {} 
+        # 2. tool_schemas: 存描述，发给 LLM 看 -> [{"type": "function", ...}]
+        self.tool_schemas: List[dict] = [] 
+
+    def tool(self, func: Callable):
+        """
+        装饰器：用于注册工具
+        使用方法：
+        @agent.tool
+        def my_func(...): ...
+        """
+        # 1. 解析 Schema
+        schema = function_to_schema(func)
+        
+        # 2. 存入 Schema 列表 (给 LLM 看的)
+        self.tool_schemas.append(schema)
+        
+        # 3. 存入函数字典 (给 Python 执行用的)
+        self.tool_map[func.__name__] = func
+        
+        # 4. 装饰器原样返回函数，不影响 Python 原生调用
+        return func
+```
+
+---
+
+### 第三步：阶段二验收（Run It!）
+
+创建一个 `test_phase_2.py` 文件，把上面的逻辑串起来跑一下。
+
+```python
+import json
+# 模拟导入 (如果你还没有分文件，直接把上面的代码贴在一个文件里运行)
+# from nano_agent.engine.agent import Agent
+# from nano_agent.core.llm import LLM
+
+# 1. 实例化 (阶段一的 LLM 这里暂时不需要真实调用，传个 None 或者 Mock 也可以，只要 Agent 类能初始化)
+llm_mock = None 
+agent = Agent(llm=llm_mock)
+
+# 2. 注册工具
+@agent.tool
+def get_weather(city: str, unit: str = "celsius"):
+    """
+    查询指定城市的天气情况。
+    """
+    return f"{city} is sunny, 25 {unit}"
+
+@agent.tool
+def calculator(a: int, b: int):
+    """
+    计算两个数字的和
+    """
+    return a + b
+
+# 3. 验证结果
+print(f"--- 已注册工具数量: {len(agent.tool_schemas)} ---")
+
+print("\n[Schema Check: get_weather]")
+# 打印出来的 JSON 应该非常漂亮
+print(json.dumps(agent.tool_schemas[0], indent=2, ensure_ascii=False))
+
+print("\n[Func Map Check]")
+print(f"Tool map keys: {agent.tool_map.keys()}")
+
+# 4. 验证原生调用是否受影响
+print("\n[Execution Check]")
+print(f"原生调用结果: {get_weather('Beijing')}")
+```
+
+### 预期输出结果
+
+如果在控制台看到类似下面的 JSON，恭喜你，你的 Agent 已经拥有了“感知”工具的能力！
+
+```json
+{
+  "type": "function",
+  "function": {
+    "name": "get_weather",
+    "description": "查询指定城市的天气情况。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "city": {
+          "type": "string",
+          "description": "Parameter city"
+        },
+        "unit": {
+          "type": "string",
+          "description": "Parameter unit"
+        }
+      },
+      "required": [
+        "city"
+      ]
+    }
+  }
+}
+```
+*注意：`unit` 有默认值，所以它不在 `required` 列表中。*
+
+---
+
+### 💡 下一步（阶段三预告）
+
+现在 `agent.tool_schemas` 里已经有了 LLM 需要的数据。
+下一阶段，你需要把这个列表传给 `client.chat.completions.create` 的 `tools` 参数。
+
+**今日任务：** 跑通上面的代码，确保生成的 Schema 没有任何语法错误，因为 LLM 对 JSON Schema 的格式非常敏感，少个括号或者类型写错都会导致模型“幻觉”或报错。

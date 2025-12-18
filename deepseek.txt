@@ -1,0 +1,122 @@
+ChatCompletion(
+    id='9381ee9e-a1c4-416b-b59e-4f89c7a33151',
+    choices=[
+        Choice(
+            finish_reason='stop',
+            index=0, 
+            logprobs=None,
+            message=ChatCompletionMessage(
+                content='好的，我来计算 23 + 23。\n\n23 + 23 = 46\n\n所以答案是 46。', 
+                refusal=None, 
+                role='assistant', 
+                annotations=None, 
+                audio=None, 
+                function_call=None, 
+                tool_calls=None)
+        )
+    ],
+    created=1766033717, 
+    model='deepseek-chat', 
+    object='chat.completion', 
+    service_tier=None, 
+    system_fingerprint='fp_eaab8d114b_prod0820_fp8_kvcache', 
+    usage=CompletionUsage(
+        completion_tokens=23, 
+        prompt_tokens=14, 
+        total_tokens=37, 
+        completion_tokens_details=None, 
+        prompt_tokens_details=PromptTokensDetails(
+            audio_tokens=None, 
+            cached_tokens=0), 
+            prompt_cache_hit_tokens=0, 
+            prompt_cache_miss_tokens=14
+        )
+)
+
+
+这份 `ChatCompletion` 对象是 OpenAI 兼容接口（如 DeepSeek）返回的典型结构。为了方便理解，我们可以将其分为四个核心板块：**基本信息**、**核心内容（Choices）**、**元数据** 以及 **消耗统计（Usage）**。
+
+---
+
+### 1. 基本信息 (Root Level)
+这些参数描述了这次请求的基础背景：
+
+*   **`id`**: `'9381ee9e-...'`
+    *   **意义**: 此次请求的唯一流水号。
+    *   **用途**: 如果程序报错或者生成内容有问题，你可以把这个 ID 提交给 API 提供商进行排查。
+*   **`created`**: `1766033717`
+    *   **意义**: Unix 时间戳（从 1970 年 1 月 1 日起算的秒数）。表示响应生成的时刻。
+*   **`model`**: `'deepseek-chat'`
+    *   **意义**: 实际执行任务的模型名称。
+*   **`object`**: `'chat.completion'`
+    *   **意义**: 对象类型，告诉 SDK 这是一个“聊天完成”对象。
+
+---
+
+### 2. 核心内容 (Choices)
+`choices` 是一个**列表**，因为在某些参数设置下（如 `n > 1`），模型可以一次性给出多个不同的回答。
+
+*   **`index`**: `0`
+    *   **意义**: 该选项在列表中的索引。
+*   **`finish_reason`**: `'stop'`（**重要指标**）
+    *   **意义**: 模型停止生成的原因。
+    *   **常见值**:
+        *   `stop`: 自然结束，模型认为话说明白了。
+        *   `length`: 达到了你设置的最大 Token 限制（`max_tokens`）。
+        *   `tool_calls`: 模型决定去调用工具了。
+        *   `content_filter`: 内容因触发敏感词被拦截。
+*   **`message`**: 包含具体内容的子对象。
+    *   **`role`**: `'assistant'`
+        *   **意义**: 消息发送者的角色（AI 为助手）。
+    *   **`content`**: `'好的，我来计算...'`
+        *   **意义**: **这是你最关心的**，模型生成的纯文本答案。注意里面的 `\n` 是换行符。
+    *   **`tool_calls`**: `None`
+        *   **意义**: 如果模型选择调用工具，这里会放 JSON 数据。此处为 None，说明模型选择了直接对话。
+
+---
+
+### 3. 元数据 (System & Internal)
+*   **`system_fingerprint`**: `'fp_eaab8d114b...'`
+    *   **意义**: “系统指纹”。
+    *   **深度解释**: 模型背后的后端配置。如果 API 供应商更新了硬件或推理引擎设置，这个指纹会变。它可以帮你排查为什么同一个模型在不同时间的输出风格突然变了。
+*   **`logprobs`**: `None`
+    *   **意义**: 对数概率。如果你在请求时设置了需要查看每个字生成的概率（信心值），这里才会有数据。
+
+---
+
+### 4. 消耗统计 (Usage)（**决定你要付多少钱**）
+这是最关键的运营指标：
+
+*   **`prompt_tokens`**: `14`
+    *   **意义**: 用户发送给模型的 Token 数量（包括系统提示词和上下文）。
+*   **`completion_tokens`**: `23`
+    *   **意义**: 模型生成答案所消耗的 Token 数量。
+*   **`total_tokens`**: `37`
+    *   **意义**: 本次请求的总消耗量（`14 + 23`）。
+
+**DeepSeek 特有的缓存参数（非常重要）：**
+*   **`prompt_cache_hit_tokens`**: `0`
+    *   **意义**: **命中缓存的 Token 数**。如果你之前发过同样的内容（比如很长的系统提示词），DeepSeek 的服务器如果缓存了这部分，这部分 Token 的计费通常会非常便宜甚至免费。
+*   **`prompt_cache_miss_tokens`**: `14`
+    *   **意义**: **未命中缓存的 Token 数**。即服务器不得不重新计算的部分。
+*   **`prompt_tokens_details`**: 
+    *   这是一个细化对象，包含了 `cached_tokens: 0`，与上面的命中数对应。
+
+---
+
+### 总结：开发者如何高效取值？
+
+在你的 Python 代码中，你通常只需要关注这几行：
+
+```python
+# 获取回复文本
+answer = response.choices[0].message.content
+
+# 获取停止原因
+reason = response.choices[0].finish_reason
+
+# 监控成本
+cost = response.usage.total_tokens
+```
+
+**小贴士**：之所以层级这么多（例如 `choices[0].message.content`），是为了兼容性和扩展性——哪怕以后模型能一次回 10 个答案，或者能边说话边发图片，这个结构都能装得下。
