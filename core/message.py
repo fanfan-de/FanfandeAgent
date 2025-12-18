@@ -1,11 +1,17 @@
 from typing import Optional,Any,Dict
+from typing import Optional, Any, List, Literal
 from pydantic import BaseModel
+from pydantic import Field
+from openai.types.chat import ChatCompletionMessageFunctionToolCall
 
 #定义消息基类
 class Message(BaseModel):
     role: str
     content: Optional[str] = None
 
+    def to_openai_dict(self):
+        return self.model_dump()
+    
 
     
 
@@ -14,15 +20,14 @@ class Message(BaseModel):
 #定义不同角色的消息类
 #system
 class SystemMessage(Message):
-    def __init__(self,content:str,**kwargs):
-        super().__init__(role="system",content=content,**kwargs)
+    role: Literal["system"] = "system"
+
 
 
 
 #user
 class UserMessage(Message):
-    def __init__(self,content:Optional[str],**kwargs):
-        super().__init__(role="user",content=content,**kwargs)
+    role: Literal["user"] = "user"
 
 
 #tools
@@ -30,19 +35,56 @@ class UserMessage(Message):
 
 class ToolMessage(Message):
     tool_call_id: str
-    
-    def __init__(self, content: str, tool_call_id: str):
-        # ⭐ 关键：将 tool_call_id 也传给父类的 __init__
-        super().__init__(role="tool", content=content, tool_call_id=tool_call_id)
+    role: Literal["tool"] = "tool"
     
 
 #llm
 class LLMMessage(Message):
-    tool_calls:Optional[str] = None
+    #嵌套的basemodel结构
+    class function(BaseModel):
+        arguments:str
+        name:str
+    class ToolCall(BaseModel):
+        id: str
+        type: str = "function"
+        function: function
 
+    tool_calls : Optional[list[ToolCall]]=None
+    role: Literal["assistant"] = "assistant"
 
-    def __init__(self,content:str,tool_calls:str):
-        super().__init__(role="assistant",content=content,tool_calls=tool_calls)
-
+    def to_openai_dict(self):
+        return {
+            "role" : self.role,
+            "content": self.content,
+            "tool_calls":[e.model_dump() for e in self.tool_calls]
+        }
+    
+    @staticmethod
+    def To_ToolCalls(ChatCompletionMessageFunctionToolCalls: List[Any]) ->Optional[List["LLMMessage.ToolCall"]]:
+        """
+        将 OpenAI SDK 返回的原生 ToolCall 对象列表转换为自定义的 Pydantic ToolCall 列表
+        """
+        if not ChatCompletionMessageFunctionToolCalls:
+            return None
+        
+        res = []
+        for tc in ChatCompletionMessageFunctionToolCalls:
+            # 1. 构造内部的 function 对象
+            # tc.function 包含 name 和 arguments
+            f_obj = LLMMessage.function(
+                name=tc.function.name,
+                arguments=tc.function.arguments
+            )
+            
+            # 2. 构造 ToolCall 对象
+            # tc 包含 id, type 和 function
+            tc_obj = LLMMessage.ToolCall(
+                id=tc.id,
+                type=tc.type,
+                function=f_obj
+            )
+            res.append(tc_obj)
+            
+        return res if res else None
 
 

@@ -31,7 +31,8 @@ class LLM:
             ## 2. 构造 API 参数
             params = {
                 "model": self.model,
-                "messages": [msg.model_dump() for msg in messages],
+                "messages": [msg.to_openai_dict() for msg in messages],
+                #"messages": messages.model_dump(exclude_none=True),
                 "stream": False,
             }
 
@@ -40,30 +41,25 @@ class LLM:
                 params["tools"] = tools
                 params["tool_choice"] = "auto" # 让模型自动决定是否调用
 
+            rprint(params)
             # 发起请求
             response = self.client.chat.completions.create(**params)
-
+            #rprint(response)
             # 获取完整的 Message 对象 (包含 content 和 tool_calls)
             response_message = response.choices[0].message
-
+            rprint(response_message)
             # 4. 关键决策点：
             # 如果模型返回了 tool_calls，我们需要把这个原始对象给回去，
             # 否则 Agent 无法解析参数。
             # 如果只是普通对话，我们可以继续用你的 LLMMessage 封装。
 
-            if response_message.tool_calls:
-            # 情况 A: 模型想要调用工具 -> 返回原始对象 (或者你需要升级 LLMMessage 来存储 tool_calls)
-                return response_message
-
-            else:
-                # 情况 B: 普通文本回复 -> 保持你原有的封装习惯
-                return LLMMessage(content=response_message.content,tool_calls = None)
+            return response_message
             
         except Exception as e:
             print(f"调用 LLM 出错: {e}")
             # 打印最后一条消息以便调试
             if messages:
-                print(f"Last Msg: {messages[-1]}")
+                rprint(f"Last Msg: {messages}")
             return LLMMessage(content="对不起，我遇到了一点错误。")
 
         # #核心方法：发送消息列表，获取 AI 回复

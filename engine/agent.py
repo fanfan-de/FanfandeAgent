@@ -4,7 +4,9 @@ from core.message import UserMessage, SystemMessage, ToolMessage,LLMMessage
 from engine.tool import function_to_schema ,ToolRegistry
 from openai.types.chat import ChatCompletionMessageFunctionToolCall
 from openai.types.chat import ChatCompletionMessageToolCall
+from typing import List
 import json
+from rich import print as rprint
 # ... 其他原有导入
 
 
@@ -15,11 +17,12 @@ class Agent:
         self.toolregistry = ToolRegistry()
         # 初始化记忆模块
         self.memory = Memory(
-            system_message=SystemMessage(system_prompt),
+            system_message=SystemMessage(content = system_prompt),
             max_messages=15 # 设定一个合理的窗口值
         )
 
-
+    
+    
     # _execute_tool 方法保持不变...
     def _execute_tool(self,tool_call:ChatCompletionMessageFunctionToolCall)->dict:
         fun = self.toolregistry.get_tool(tool_call.function.name)
@@ -36,23 +39,25 @@ class Agent:
 
     def run(self, prompt: str, max_turns: int = 5):
         # 1. 将用户输入存入记忆
-        self.memory.add(UserMessage(prompt))
+        self.memory.add(UserMessage(content = prompt))
         current_turn = 0
         while current_turn < max_turns:
             current_turn += 1
 
             messages_to_send = self.memory.to_messages()
+            rprint( messages_to_send)
+            response_message = self.llm.chat(messages_to_send, self.toolregistry.tool_schemas)
 
-            response_message = self.llm.chat(messages_to_send, None)
+            #存LLMMessage 到memory
 
 
             # 5. 判断是否调用工具
             if response_message.tool_calls:
-                temp = LLMMessage(content = response_message.content,
-                          tool_calls=response_message.tool_calls)
-                self.memory.add(temp)
+                message = LLMMessage(content = response_message.content,
+                tool_calls=LLMMessage.To_ToolCalls(response_message.tool_calls))
+                self.memory.add(message)
+                #self.memory.add(temp)
                 for tool_call in response_message.tool_calls:
-                    self.memory.add(LLMMessage)
                     # 执行工具
                     tool_result_dict = self._execute_tool(tool_call)
                     #print("tool_result_dict:")
@@ -69,8 +74,8 @@ class Agent:
                 
                 # 循环继续，下一轮 LLM 会看到工具结果
             else:
-                temp = LLMMessage(content = response_message.content,tool_calls = None)
-                self.memory.add(temp)
+                message = LLMMessage(content = response_message.content)
+                self.memory.add(message)
                 print(f"🤖 Answer: {response_message.content}")
                 return response_message.content
         
