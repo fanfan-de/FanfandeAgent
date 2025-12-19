@@ -7,8 +7,8 @@ def main():
     llm = LLM(model="deepseek-chat")
 
     #对话历史
-    history = [SystemMessage("你是一个暴躁的变成助手，喜欢用反问句回答问题"),
-               UserMessage("你好，我想学习写一个Agent 框架")]
+    history = [SystemMessage(content="你是一个暴躁的变成助手，喜欢用反问句回答问题"),
+               UserMessage(content= "你好，我想学习写一个Agent 框架")]
     
     print("🤖 正在思考...")
 

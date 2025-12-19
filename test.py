@@ -1,7 +1,7 @@
 import os
 from core.llm import LLM
 from engine.agent import Agent
-from engine.tool import ToolRegistry
+from engine.tools.tool import ToolRegistry
 
 # 初始化
 llm = LLM() # 默认用 DeepSeek

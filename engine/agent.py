@@ -1,7 +1,7 @@
 # 需要导入新的 Memory 和 Message 类
 from core.memory import Memory
 from core.message import UserMessage, SystemMessage, ToolMessage,LLMMessage
-from engine.tool import function_to_schema ,ToolRegistry
+from engine.tools.tool import function_to_schema ,ToolRegistry
 from openai.types.chat import ChatCompletionMessageFunctionToolCall
 from openai.types.chat import ChatCompletionMessageToolCall
 from typing import List

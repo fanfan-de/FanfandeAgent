@@ -2,7 +2,6 @@ from typing import Optional,Any,Dict
 from typing import Optional, Any, List, Literal
 from pydantic import BaseModel
 from pydantic import Field
-from openai.types.chat import ChatCompletionMessageFunctionToolCall
 
 #定义消息基类
 class Message(BaseModel):
@@ -13,30 +12,20 @@ class Message(BaseModel):
         return self.model_dump()
     
 
-    
-
-#kwargs 是关键字参数包，接收所有未明确声明的命名参数，以字典形式传递给函数，用于扩展参数处理的灵活性。
-
 #定义不同角色的消息类
 #system
 class SystemMessage(Message):
     role: Literal["system"] = "system"
 
-
-
-
 #user
 class UserMessage(Message):
     role: Literal["user"] = "user"
 
-
 #tools
 # core/message.py
-
 class ToolMessage(Message):
     tool_call_id: str
     role: Literal["tool"] = "tool"
-    
 
 #llm
 class LLMMessage(Message):
@@ -83,7 +72,6 @@ class LLMMessage(Message):
                 function=f_obj
             )
             res.append(tc_obj)
-            
         return res if res else None
 
 
