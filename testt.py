@@ -6,7 +6,7 @@ from mcp.client.stdio import stdio_client
 
 async def debug_github_agent():
     # 1. 确保 Token 字符串前后没有空格
-    github_token = "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" # 换成你的真实 Token
+    github_token = "" # 换成你的真实 Token
 
     server_params = StdioServerParameters(
         command="npx.cmd",

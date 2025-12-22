@@ -7,7 +7,7 @@ from mcp.client.stdio import stdio_client
 async def run_github_agent():
     # 1. 配置 GitHub Token
     # 生产环境下建议从 .env 文件或环境变量读取
-    github_token = "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"
+    github_token = ""
 
     # 2. 配置 GitHub MCP Server 参数
     # 使用 npx 直接运行官方的 github server
