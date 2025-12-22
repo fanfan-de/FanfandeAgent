@@ -11,10 +11,7 @@ agent.memory.max_messages = 4 # 只保留最近 4 条，非常严苛
 
 
 
-@agent.toolregistry.register
-def add(a: int, b: int):
-    """加法,将两个数相加"""
-    return a + b
+
 
 prompt="start"
 while prompt != "end":

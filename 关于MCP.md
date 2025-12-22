@@ -104,3 +104,15 @@ MCP 的 `Resources` 接口允许 Agent **按需加载**内容。Agent 可以先�
 
 对于你之前提到的 **“多 Agent 系统”**，MCP 更是神技：
 你可以让 **Agent A** 挂载了 "GitHub MCP Server"，让 **Agent B** 挂载了 "Notion MCP Server"。通过标准的协议，你可以在配置文件里随意插拔 Agent 的能力，而不需要改动一行核心代码。这是通往**模块化通用智能体**的必经之路。
+
+
+在 MCP 生态中，有三个角色：
+- **MCP Server**: 提供工具（如查询数据库、读取文件、搜索网页）。
+- **你的 Agent (MCP Host)**: 负责管理连接、调度工具，并与 LLM 交互。
+- **LLM**: 决定何时调用哪个工具。
+
+
+### 2. 技术选型
+Anthropic 官方提供了两种主要的 SDK，建议根据你 Agent 的开发语言选择：
+- **Python SDK**: `mcp` (适用于 Python 开发的 Agent)
+- **TypeScript SDK**: `@modelcontextprotocol/sdk` (适用于 Node.js 环境)

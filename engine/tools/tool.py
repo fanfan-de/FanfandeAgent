@@ -2,19 +2,6 @@ import inspect
 from typing import get_type_hints,Dict,Callable,List
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 def get_json_type(py_type):
     """
     将 Python 类型映射为 JSON Schema 类型
