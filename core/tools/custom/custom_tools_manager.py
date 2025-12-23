@@ -70,14 +70,13 @@ def function_to_schema(func) -> dict:
     return schema
 
 
-class ToolRegistry:
+class CustomToolRegistry: 
     """工具注册器"""
-    def __init__(self):
-        self._tools: Dict[str, Dict] = {}
-        self.tool_schemas:List[Dict[str, Dict]] = []
-        self.tool_map:Dict[str,Callable]={}
-    
-    
+    tools : Dict[str, Dict] = {}
+    tool_schemas :List[Dict[str, Dict]] = []
+    tool_map :Dict[str,Callable]={}
+
+
     def register(self,func):
         # 1. 【翻译】解析函数的 Schema (给 LLM 看的菜单)
         schema = function_to_schema(func)

@@ -1,11 +1,26 @@
-from .mcp.manager import MCPManager
-from .local_tools import LocalTools
+from .custom.custom_tools_manager import CustomToolRegistry
+from .mcp.mcp_manager import MCPManager
 
-#本地和mcp  统一的工具注册类
-class UnifiedToolRegistry:
+
+# class ToolManager:
+#     def __init__(self):
+#         self.custom
+
+#     def add_tool(self, tool):
+#         self.tools.append(tool)
+
+#     def remove_tool(self, tool):
+#         if tool in self.tools:
+#             self.tools.remove(tool)
+
+#     def get_tools(self):
+#         return self.tools
+    
+
+class ToolManager:
     def __init__(self, mcp_config_path: str):
         self.mcp_manager = MCPManager(mcp_config_path)
-        self.local_tools = {t["name"]: t for t in LOCAL_TOOLS_METADATA}
+        self.local_tools = {t["name"]: t for t in CustomToolRegistry.tool_schemas}
         self.all_tool_definitions = []
 
     async def initialize(self):
@@ -45,3 +60,4 @@ class UnifiedToolRegistry:
 
     async def shutdown(self):
         await self.mcp_manager.stop_all()
+

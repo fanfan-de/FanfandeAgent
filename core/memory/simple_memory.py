@@ -1,20 +1,18 @@
 from typing import List
-from core.message import Message, SystemMessage
+from core.message.message import Message, SystemMessage
+'''
+    上下文窗口数量限制
+    简单的message的叠加
+'''
 
-'''
-记忆模块组成
-    ---系统提示词
-    ---最大上下文长度
-    ---记忆历史，即消息列表
-'''
-class Memory:
-    def __init__(self, system_message: SystemMessage = None, max_messages: int = 10):
+class SimpleMemory:
+    def __init__(self,system_message: SystemMessage = None, history:List[Message]=[],max_messages: int = 10):
         """
         :param system_message: 系统提示词（永久保留）
         :param max_messages: 滑动窗口大小（保留最近的多少条消息）
         """
         self.system_message = system_message
-        self.history: List[Message] = [] # 存储 User, Assistant, Tool 消息
+        self.history: List[Message] = history # 存储 User, Assistant, Tool 消息
         self.max_messages = max_messages
 
     def add(self, message: Message):
@@ -44,3 +42,5 @@ class Memory:
     
     def clear(self):
         self.history = []
+
+

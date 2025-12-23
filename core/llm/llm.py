@@ -1,12 +1,11 @@
 import os
 from dotenv import load_dotenv
 from typing import  List, Optional, Dict, Any, Union
-from core.message import Message, LLMMessage
+from core.message.message import Message, LLMMessage
 from deepseek import DeepSeekAPI
 from openai import OpenAI
 from openai.types.chat import ChatCompletionMessage
 from rich import print as rprint
-from rich.console import Console
 
 
 #load env
@@ -20,13 +19,14 @@ class LLM:
             api_key=os.environ.get('DEEPSEEK_API_KEY'), 
             base_url="https://api.deepseek.com"
         )
-
+    #输入输出
     def chat(self,messages:List[Message],tools:Optional[List[Dict]]=None)->Union[LLMMessage,ChatCompletionMessage]:
         """
         核心方法：发送消息列表，获取 AI 回复
         :param messages: 历史消息列表
         :param tools: (新增) 工具的 JSON Schema 列表
         """
+        rprint(messages)
         try:
             ## 2. 构造 API 参数
             params = {
@@ -44,39 +44,12 @@ class LLM:
             rprint(params)
             # 发起请求
             response = self.client.chat.completions.create(**params)
-            #rprint(response)
-            # 获取完整的 Message 对象 (包含 content 和 tool_calls)
-            response_message = response.choices[0].message
-            rprint(response_message)
-            # 4. 关键决策点：
-            # 如果模型返回了 tool_calls，我们需要把这个原始对象给回去，
-            # 否则 Agent 无法解析参数。
-            # 如果只是普通对话，我们可以继续用你的 LLMMessage 封装。
-
-            return response_message
-            
+            # 返回消息
+            return response
         except Exception as e:
             print(f"调用 LLM 出错: {e}")
             # 打印最后一条消息以便调试
             if messages:
                 rprint(f"Last Msg: {messages}")
             return LLMMessage(content="对不起，我遇到了一点错误。")
-
-        # #核心方法：发送消息列表，获取 AI 回复
-        # client = self.client
-        # try:
-        #     response = client.chat.completions.create(
-        #         model=self.model,
-        #         messages = [msg.to_deepseek_dict() for msg in messages],
-        #         stream=False
-        #     )  
-        #     response_message = response.choices[0].message
-        #     content = response_message.content
-
-        #     return LLMMessage(content=content)
-        
-        # except Exception as e:
-        #     print(f"调用 LLM 出错: {e}")
-        #     print(messages)
-        #     return LLMMessage(content="对不起，我遇到了一点错误。")
 
