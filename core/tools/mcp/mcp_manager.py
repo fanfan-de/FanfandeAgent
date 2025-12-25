@@ -6,7 +6,7 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 class MCPManager:
-    def __init__(self, config_path: str):
+    def __init__(self, config_path: str = "tools/mcp/config.json"):
         self.config_path = config_path
         self.sessions = {}  # server_name -> session
         self.exit_stack = AsyncExitStack()

@@ -4,40 +4,41 @@ from core.memory.simple_memory import SimpleMemory
 from core.tools.tool_manager import ToolManager
 from rich import print as rprint
 
+
+
 def main():
     
-    #对话历史
+    #初始化对话历史
     memory = SimpleMemory(system_message=SystemMessage(content = "你是一个暴躁的编程助手，喜欢用反问句回答问题"),
                     history=[])
     #初始化LLM
     llm = LLM(model="deepseek-chat")
 
     #初始化工具服务
-    # mcp_manager = MCPManager("tools/mcp/config.json")
-    # mcp_manager.start_servers()
-    # llm_tools = mcp_manager.get_combined_tools()
-    unified_tool_registry = ToolManager("tools/mcp/config.json")
 
+    toolmanager = ToolManager("tools/mcp/config.json")
 
+    #user第一次的prompt输入
+    user_input =  input()
+    memory.add(UserMessage(content=user_input))
 
     # 3. Agent 决策循环 (简易版)
     while True:
-
-        user_input =  input()
-        memory.add(UserMessage(content=user_input))
-
+        #LLM 生成回复 
         native_response = llm.chat(memory.to_messages())
         print(native_response)
         response = native_response.choices[0].message
         memory.add(LLMMessage(content=response.content,tool_calls=response.tool_calls))
+        
         # 如果 LLM 不需要调用工具，直接输出结果并停止
         if response.tool_calls == None:
             print("\nAgent 回复:", response.content)
-            break
+            #下一次输入
+            user_input =  input()
+            memory.add(UserMessage(content=user_input))
+            continue
 
         # 4. 如果 LLM 需要调用工具
-        memory.add(LLMMessage(content=response.content,tool_calls=response.tool_calls))
-        memory.append({"role": "assistant", "content": response.content})
         
         for content_block in response.content:
             if content_block.type == "tool_use":
@@ -57,22 +58,7 @@ def main():
                 memory.Add(
                     ToolMessage(content=tool_result_content,
                                  tool_use_id=tool_use_id))
-                #     "role": "user",
-                #     "content": [
-                #         {
-                #             "type": "tool_result",
-                #             "tool_use_id": tool_use_id,
-                #             "content": tool_result_content,
-                #         }
-                #     ],
-                # })
                 print(f"工具执行完毕，正在发回 LLM...")
-
-
-
-
-
-    
 
 
 

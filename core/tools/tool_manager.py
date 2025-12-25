@@ -1,25 +1,10 @@
 from .custom.custom_tools_manager import CustomToolRegistry
 from .mcp.mcp_manager import MCPManager
 
-
-# class ToolManager:
-#     def __init__(self):
-#         self.custom
-
-#     def add_tool(self, tool):
-#         self.tools.append(tool)
-
-#     def remove_tool(self, tool):
-#         if tool in self.tools:
-#             self.tools.remove(tool)
-
-#     def get_tools(self):
-#         return self.tools
-    
-
 class ToolManager:
-    def __init__(self, mcp_config_path: str):
-        self.mcp_manager = MCPManager(mcp_config_path)
+    def __init__(self):
+        """工具管理器：整合 MCP 工具和本地自定义工具"""
+        self.mcp_manager = MCPManager()
         self.local_tools = {t["name"]: t for t in CustomToolRegistry.tool_schemas}
         self.all_tool_definitions = []
 

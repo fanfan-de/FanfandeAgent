@@ -33,7 +33,7 @@ class LLM:
                 "model": self.model,
                 "messages": [msg.to_openai_dict() for msg in messages],
                 #"messages": messages.model_dump(exclude_none=True),
-                "stream": False,
+                "stream": True,
             }
 
              # 3. 如果有工具，则传入 tools 参数
@@ -44,8 +44,20 @@ class LLM:
             rprint(params)
             # 发起请求
             response = self.client.chat.completions.create(**params)
+
+            #  处理流式响应
+            full_response_content = ""
+            for chunk in response:
+                    # 提取流式增量内容
+                        content = chunk#.choices[0].delta.content
+                        if content:
+                            print(content, end="", flush=True)
+                            print("\n")
+                            #full_response_content += content
+
             # 返回消息
-            return response
+            
+            return 
         except Exception as e:
             print(f"调用 LLM 出错: {e}")
             # 打印最后一条消息以便调试
