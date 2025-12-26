@@ -3,6 +3,10 @@ from typing import Optional, Any, List, Literal
 from pydantic import BaseModel
 from pydantic import Field
 
+'''
+这里的消息是会放入 context中的消息
+'''
+
 #定义消息基类
 class Message(BaseModel):
     role: str

@@ -46,18 +46,21 @@ class LLM:
             response = self.client.chat.completions.create(**params)
 
             #  处理流式响应
-            full_response_content = ""
+            full_response_content:str = ""
+            tool_calls:List[LLMMessage.ToolCall] = []
+
             for chunk in response:
                     # 提取流式增量内容
-                        content = chunk#.choices[0].delta.content
+                        content = chunk.choices[0].delta.content
                         if content:
                             print(content, end="", flush=True)
-                            print("\n")
-                            #full_response_content += content
 
-            # 返回消息
-            
-            return 
+                            full_response_content += content
+                            tool_calls.append(chunk.choices[0].delta.tool_calls) if chunk.choices[0].delta.tool_calls else None
+
+            # message in，llmmessage out
+            return LLMMessage(content=full_response_content,tool_calls=tool_calls)
+        
         except Exception as e:
             print(f"调用 LLM 出错: {e}")
             # 打印最后一条消息以便调试
