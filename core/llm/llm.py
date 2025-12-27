@@ -2,7 +2,6 @@ import os
 from dotenv import load_dotenv
 from typing import  List, Optional, Dict, Any, Union
 from core.message.message import Message, LLMMessage
-from deepseek import DeepSeekAPI
 from openai import OpenAI
 from openai.types.chat import ChatCompletionMessage
 from rich import print as rprint
