@@ -3,6 +3,7 @@ from core.message.message import UserMessage , SystemMessage,LLMMessage,ToolMess
 from core.memory.simple_memory import SimpleMemory
 from core.tools.tool_manager import ToolManager
 from rich import print as rprint
+
 import asyncio
 import os
 from pydantic import AnyUrl
@@ -12,7 +13,6 @@ from mcp.shared.context import RequestContext
 from mcp.shared.metadata_utils import get_display_name
 from mcp.server.fastmcp import FastMCP
 from core.tools.mcp.mcp_client import MCPClient 
-
 
 
 async def run_agent_workflow():
@@ -27,7 +27,20 @@ async def run_agent_workflow():
     #mcp
     #创建MCp客户端
     mcp_client = MCPClient()
-    await mcp_client.connect_to_server(".mcp_server.py")
+
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    # 拼接成完整路径 (E:\Project\FanfandeAgent\.mcp_server.py)
+    server_path = os.path.join(base_dir, "core/tools/mcp/mcp_server.py")
+    print(f"正在连接 Server: {server_path}") # 打印出来看路径对不对！
+    await mcp_client.connect_to_server(server_path)
+
+    tools =  await mcp_client.session.list_tools()
+    available_tools = [{ 
+            "name": tool.name,
+            "description": tool.description,
+            "input_schema": tool.inputSchema
+        } for tool in tools.tools]
+    
 
 
     #user第一次的prompt输入
@@ -38,7 +51,7 @@ async def run_agent_workflow():
     # 3. Agent 决策循环 (简易版)
     while True:
         #LLM 生成 response
-        llmmessage = llm.chat(memory.to_messages())
+        llmmessage = llm.chat(memory.to_messages(),tools=available_tools)
         rprint(llmmessage)
 
         memory.add(llmmessage)
@@ -57,22 +70,7 @@ async def run_agent_workflow():
         # 4. 如果 LLM 需要调用工具
         for toolcall in  llmmessage.tool_calls:
             if toolcall.type == "function":
-                # tool_name = content_block.name
-                # tool_args = content_block.input
-                # tool_use_id = content_block.id
 
-                # 执行 MCP 工具
-                # result = ToolManager.handle_tool_call(tool_name, tool_args)
-                
-                # # 将结果反馈给 LLM (处理 result 可能包含 text 或 image 的情况)
-                # tool_result_content = []
-                # for item in result:
-                #     if hasattr(item, 'text'):
-                #         tool_result_content.append({"type": "text", "text": item.text})
-
-                # memory.Add(
-                #     ToolMessage(content=tool_result_content,
-                #                     tool_use_id=tool_use_id))
                 print(f"工具执行完毕，正在发回 LLM...")
 
 if __name__ == "__main__":

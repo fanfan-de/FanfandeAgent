@@ -6,7 +6,6 @@
       {
         "id": "12452010626b52bd",
         "type": "tabs",
-        "dimension": 22.685788787483702,
         "children": [
           {
             "id": "0989587ac6e7fd0d",
@@ -26,38 +25,16 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Skills/Skills.md",
+                "file": "2025-12-29.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Skills"
+              "title": "2025-12-29"
             }
           }
-        ]
-      },
-      {
-        "id": "65647115b5f07791",
-        "type": "tabs",
-        "dimension": 77.3142112125163,
-        "children": [
-          {
-            "id": "ddd749d3428fe1c9",
-            "type": "leaf",
-            "pinned": true,
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Agents.md",
-                "mode": "source",
-                "source": false
-              },
-              "pinned": true,
-              "icon": "lucide-file",
-              "title": "Agents"
-            }
-          }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -220,11 +197,14 @@
       "bases:创建新数据库": false
     }
   },
-  "active": "ddd749d3428fe1c9",
+  "active": "831cc22096eb6cb4",
   "lastOpenFiles": [
+    "Pasted image 20251229122039.png",
+    "Skills/Skills.md",
+    "2025-12-29.md",
+    "Agents.md",
     "22365_19_Agents_v8_images/page_28_img_1.png",
     "image15.md",
-    "Agents.md",
     "22365_19_Agents_v8_images/page_29_img_1.png",
     "22365_19_Agents_v8_images/page_30_img_1.png",
     "22365_19_Agents_v8_images/page_31_img_1.png",
@@ -253,14 +233,12 @@
     "image1.md",
     "Embeddings & Vector Stores - 嵌入与向量存储.md",
     "Skills/Understand Skills.md",
-    "Skills/Skills.md",
     "Skills/Untitled.md",
     "Skills/asd.py",
     "Skills.md",
     "Skills",
     "Understand Skills.md",
     "Untitled",
-    "Untitled.md",
-    "Welcome.md"
+    "Untitled.md"
   ]
 }
