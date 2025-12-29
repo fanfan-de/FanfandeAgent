@@ -36,9 +36,12 @@ async def run_agent_workflow():
 
     tools =  await mcp_client.session.list_tools()
     available_tools = [{ 
-            "name": tool.name,
-            "description": tool.description,
-            "input_schema": tool.inputSchema
+            "type": "function",  #必须有这个字段
+            "function":{
+                "name": tool.name,
+                "description": tool.description,
+                "parameters": tool.inputSchema
+            }
         } for tool in tools.tools]
     
 
@@ -56,8 +59,10 @@ async def run_agent_workflow():
 
         memory.add(llmmessage)
         
+        print("\n--------开始解析LLM Response----------\n")
         # 如果 LLM 不需要调用工具，直接输出结果并停止
         if  llmmessage.tool_calls == None or llmmessage.tool_calls == []:
+
             print("\nAgent 回复:", llmmessage.content)
 
             #下一次输入
@@ -66,12 +71,14 @@ async def run_agent_workflow():
             continue
 
 
-
+        print("\n--------需要调用tools----------\n")   
         # 4. 如果 LLM 需要调用工具
         for toolcall in  llmmessage.tool_calls:
             if toolcall.type == "function":
 
                 print(f"工具执行完毕，正在发回 LLM...")
+                print(f"todo")
+
 
 if __name__ == "__main__":
     # 使用 asyncio.run 启动顶层异步任务
