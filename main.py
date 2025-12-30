@@ -3,7 +3,7 @@ from core.message.message import UserMessage , SystemMessage,LLMMessage,ToolMess
 from core.memory.simple_memory import SimpleMemory
 from core.tools.tool_manager import ToolManager
 from rich import print as rprint
-
+import json  # 确保文件头部导入了 json
 import asyncio
 import os
 from pydantic import AnyUrl
@@ -75,7 +75,8 @@ async def run_agent_workflow():
         # 4. 如果 LLM 需要调用工具
         for toolcall in  llmmessage.tool_calls:
             if toolcall.type == "function":
-
+                result = await mcp_client.session.call_tool(name=toolcall.function.name,arguments=json.loads(toolcall.function.arguments))
+                rprint(result)
                 print(f"工具执行完毕，正在发回 LLM...")
                 print(f"todo")
 
