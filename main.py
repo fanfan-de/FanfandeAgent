@@ -77,8 +77,10 @@ async def run_agent_workflow():
             if toolcall.type == "function":
                 result = await mcp_client.session.call_tool(name=toolcall.function.name,arguments=json.loads(toolcall.function.arguments))
                 rprint(result)
-                print(f"工具执行完毕，正在发回 LLM...")
-                print(f"todo")
+                memory.add(ToolMessage(content= result.content[0].text, tool_call_id=toolcall.id))   
+        
+        print(f"\n-----------------工具执行完毕,存入memory----------------------\n")
+
 
 
 if __name__ == "__main__":
