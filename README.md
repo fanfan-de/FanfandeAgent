@@ -4,7 +4,7 @@
   <h3 align="center">Fanfande_Agent (Project Title)</h3>
 
   <p align="center">
-  **Your-Project-Name** 是一个旨在打破 AI 开发“黑盒焦虑”的极简框架。
+  **fanfande-agent** 是一个旨在打破 AI 开发“黑盒焦虑”的极简框架。
 
   在当前的 AI 开发中，许多框架（如 LangChain）虽然功能强大，但往往引入了过多的抽象层和不可见的“魔法”，导致开发者难以调试或进行底层优化。
 
