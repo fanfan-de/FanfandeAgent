@@ -12,7 +12,7 @@ load_dotenv()
 
 class LLM:
     #init
-    def __init__(self,model:str="deepseek-chat"):
+    def __init__(self,model:str="deepseek-reasoner"):
         self.model = model
         self.client = OpenAI(
             api_key=os.environ.get('DEEPSEEK_API_KEY'), 
@@ -33,6 +33,7 @@ class LLM:
                 "messages": [msg.to_openai_dict() for msg in messages],
                 #"messages": messages.model_dump(exclude_none=True),
                 "stream": True,
+                "extra_body":{"thinking":{"type":"enabled"}}
             }
 
 
@@ -47,8 +48,8 @@ class LLM:
             response = self.client.chat.completions.create(**params)
             print("\n流式传输中.................................\n")
             #  处理流式响应
-            full_response_content:str = ""
-            full_response_content_reasoning:str = ""
+            full_response_content = ""
+            full_response_content_reasoning = ""
             #full_response_toolcall:str = ""
             #tool_calls:List[LLMMessage.ToolCall] = []
             # 1. 初始化累加器
@@ -56,26 +57,20 @@ class LLM:
 
             for chunk in response:
                 # 提取流式增量内容
-                rprint(chunk, end=" chunk", flush=True)
+                #rprint(chunk.choices[0].delta, end=" ", flush=True)
 
                 #推理
-                reasoning_content = getattr(chunk.choices[0].delta.reasoning_content, None)
+                reasoning_content = getattr(chunk.choices[0].delta, "reasoning_content", None)
                 if reasoning_content:
-                    rprint(reasoning_content, end=" ", flush=True)
-                    full_response_content_reasoning += reasoning_content
+                    rprint(chunk.choices[0].delta.reasoning_content, end=" ", flush=True)
+                    full_response_content_reasoning  += chunk.choices[0].delta.reasoning_content
 
-                #回答
-                content = chunk.choices[0].delta.content
-                if content:
-                    rprint(content, end=" ", flush=True)
-                    full_response_content += content 
-
-
-
-
-                deltatoolcalls = chunk.choices[0].delta.tool_calls
-                #rprint(deltatoolcalls)
-                if deltatoolcalls:
+                if chunk.choices[0].delta.content:
+                    rprint(chunk.choices[0].delta.content, end=" ", flush=True)
+                    full_response_content += chunk.choices[0].delta.content
+                
+                if chunk.choices[0].delta.tool_calls:
+                    deltatoolcalls = chunk.choices[0].delta.tool_calls
                     for tool_call_delta in deltatoolcalls:
                         index = tool_call_delta.index
             #                 # 如果是该索引的第一个片段，初始化数据结构
@@ -89,6 +84,7 @@ class LLM:
                         
                         # 累加参数片段 (arguments 往往是分多次流式传输的)
                         if tool_call_delta.function.arguments:
+                            rprint(tool_call_delta.function.arguments, end=" ", flush=True)
                             final_tool_calls[index].function.arguments += tool_call_delta.function.arguments
                         
                         # 有时 id 或 name 也会在后续片段中才完整，虽然通常在第一个片段
@@ -99,7 +95,7 @@ class LLM:
 
             return LLMMessage(content=full_response_content,
                               tool_calls= list(final_tool_calls.values()) if final_tool_calls else None,
-                              reasoning_content=None
+                              reasoning_content = full_response_content_reasoning
                               )
         
         except Exception as e:

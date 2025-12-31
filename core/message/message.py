@@ -49,7 +49,9 @@ class LLMMessage(Message):
     def to_openai_dict(self):
         return {"role" : self.role,
                 "content": self.content,
-                "tool_calls":[e.model_dump() for e in self.tool_calls ] if self.tool_calls else None
+                "tool_calls":[e.model_dump() for e in self.tool_calls ] if self.tool_calls else None,
+                "reasoning_content": self.reasoning_content
+
         }
     
     @staticmethod
