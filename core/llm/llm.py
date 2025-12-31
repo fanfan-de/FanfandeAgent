@@ -35,11 +35,12 @@ class LLM:
                 "stream": True,
             }
 
+
              # 3. 如果有工具，则传入 tools 参数
             if tools:
                 params["tools"] = tools
                 params["tool_choice"] = "auto" # 让模型自动决定是否调用
-            print("\n发给LLM的内容\n-------------------------------------------------\n")
+            print("\nAPI 接口函数的输入param\n-------------------------------------------------\n")
             rprint(params)
             print("\n")
             print("\n发起请求\n")
@@ -47,6 +48,7 @@ class LLM:
             print("\n流式传输中.................................\n")
             #  处理流式响应
             full_response_content:str = ""
+            full_response_content_reasoning:str = ""
             #full_response_toolcall:str = ""
             #tool_calls:List[LLMMessage.ToolCall] = []
             # 1. 初始化累加器
@@ -54,13 +56,25 @@ class LLM:
 
             for chunk in response:
                 # 提取流式增量内容
+                rprint(chunk, end=" chunk", flush=True)
+
+                #推理
+                reasoning_content = chunk.choices[0].delta.reasoning_content
+                if reasoning_content:
+                    rprint(reasoning_content, end=" ", flush=True)
+                    full_response_content_reasoning += reasoning_content
+
+                #回答
                 content = chunk.choices[0].delta.content
                 if content:
-                    rprint(content, end="", flush=True)
+                    rprint(content, end=" ", flush=True)
                     full_response_content += content 
 
+
+
+
                 deltatoolcalls = chunk.choices[0].delta.tool_calls
-                rprint(deltatoolcalls)
+                #rprint(deltatoolcalls)
                 if deltatoolcalls:
                     for tool_call_delta in deltatoolcalls:
                         index = tool_call_delta.index
@@ -82,21 +96,11 @@ class LLM:
                             final_tool_calls[index].id = tool_call_delta.id
                         if tool_call_delta.function.name:
                             final_tool_calls[index].function.name = tool_call_delta.function.name
-                    
-                    
-            #         if toolcall[0].id!=None:
-            #                 tool_calls.append(LLMMessage.ToolCall(id = toolcall[0].id,
-            #                                             type=toolcall[0].type,function=toolcall[0].function))
-            #         else:
-            #                 tool_calls[-1].function.arguments += toolcall[0].function.arguments
-                                
 
-            #                 #tool_calls.append(chunk.choices[0].delta.tool_calls) if chunk.choices[0].delta.tool_calls else None
-
-            # rprint(full_response_content + "full_response_content" )  # 换行
-            # rprint(full_response_toolcall + "full_response_toocall" )  # 换行
-            # # message in，llmmessage out
-            return LLMMessage(content=full_response_content,tool_calls= list(final_tool_calls.values()) if final_tool_calls else None)
+            return LLMMessage(content=full_response_content,
+                              tool_calls= list(final_tool_calls.values()) if final_tool_calls else None,
+                              reasoning_content=None
+                              )
         
         except Exception as e:
             print(f"调用 LLM 出错: {e}")
