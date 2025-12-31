@@ -59,7 +59,7 @@ class LLM:
                 rprint(chunk, end=" chunk", flush=True)
 
                 #推理
-                reasoning_content = chunk.choices[0].delta.reasoning_content
+                reasoning_content = getattr(chunk.choices[0].delta.reasoning_content, None)
                 if reasoning_content:
                     rprint(reasoning_content, end=" ", flush=True)
                     full_response_content_reasoning += reasoning_content

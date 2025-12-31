@@ -18,11 +18,11 @@ from core.tools.mcp.mcp_client import MCPClient
 async def run_agent_workflow():
 
     #初始化对话历史
-    memory = SimpleMemory(system_message=SystemMessage(content = "你是一个具备推理和行动能力的助手。"),
+    memory = SimpleMemory(system_message=SystemMessage(content = "你是一个暴躁的编程助手，喜欢用反问句回答问题"),
                     history=[])
 
     #初始化LLM
-    llm = LLM(model="deepseek-reasoner")
+    llm = LLM(model="deepseek-chat")
 
     #mcp
     #创建MCp客户端
