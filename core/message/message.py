@@ -44,6 +44,7 @@ class LLMMessage(Message):
 
     tool_calls : Optional[list[ToolCall]]=None
     role: Literal["assistant"] = "assistant"
+    reasoning_content: Optional[str] = None
 
     def to_openai_dict(self):
         return {"role" : self.role,
