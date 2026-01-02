@@ -1,10 +1,11 @@
 <!-- PROJECT LOGO -->
+
+# Fanfande_Agent : 从0开始搭建的AI Agent
+
 <br />
 <div align="center"
-  <h3 align="center">Fanfande_Agent (Project Title)</h3>
-
   <p align="center">
-  **fanfande-agent** 是一个旨在打破 AI 开发“黑盒焦虑”的极简框架。
+  fanfande-agent 是一个旨在打破 AI 开发“黑盒焦虑”的极简框架。
 
   在当前的 AI 开发中，许多框架（如 LangChain）虽然功能强大，但往往引入了过多的抽象层和不可见的“魔法”，导致开发者难以调试或进行底层优化。
 
@@ -20,6 +21,8 @@
     <a href="https://github.com/github_username/repo_name/issues">提出新特性</a>
   </p>
 </div>
+
+
 
 <!-- 目录 -->
 ## 目录
