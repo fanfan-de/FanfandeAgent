@@ -47,7 +47,7 @@ class MCPClient:
             server_params = StdioServerParameters(
                 command=sys.executable,
                 args=[str(path)],
-                env=env,
+                env=env,    
                 stderr=sys.stderr  # <---【关键修改】把子进程的报错显示在主终端
             )
 

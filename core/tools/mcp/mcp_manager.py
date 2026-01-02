@@ -4,9 +4,14 @@ import os
 from contextlib import AsyncExitStack
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
+from rich import print as rprint
+base_dir = os.path.dirname(os.path.abspath(__file__))
+print(base_dir)
 
 class MCPManager:
-    def __init__(self, config_path: str = "tools/mcp/config.json"):
+    #读取mcp 配置文件
+    def __init__(self, config_path: str = base_dir + "\\config.json"):
+        #mcp  配置文
         self.config_path = config_path
         self.sessions = {}  # server_name -> session
         self.exit_stack = AsyncExitStack()
@@ -65,7 +70,7 @@ class MCPManager:
         session = self.sessions[server_name]
         print(f"正在调用 {server_name} 的工具: {tool_name}...")
         result = await session.call_tool(tool_name, arguments)
-        return result.content
+        return result
 
     async def stop_all(self):
         """关闭所有连接"""
