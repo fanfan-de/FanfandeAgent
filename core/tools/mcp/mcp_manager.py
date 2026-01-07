@@ -26,6 +26,12 @@ class MCPManager:
             print(f"正在启动 MCP Server: {server_name}...")
             
             # 配置启动参数
+            '''
+            MCP 客户端Client用来告诉系统
+            如何启动一个 MCP 服务器Server的配置清单
+
+            
+            '''
             params = StdioServerParameters(
                 command=server_config["command"],
                 args=server_config["args"],
@@ -75,3 +81,13 @@ class MCPManager:
     async def stop_all(self):
         """关闭所有连接"""
         await self.exit_stack.aclose()
+
+async def main():
+        
+    mcp_manager = MCPManager()
+    await mcp_manager.start_servers()
+
+
+if __name__ == "__main__":
+    import sys
+    asyncio.run(main())

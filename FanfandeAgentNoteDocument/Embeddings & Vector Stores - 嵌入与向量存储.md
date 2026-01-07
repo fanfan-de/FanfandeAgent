@@ -26,15 +26,12 @@ Per Jacobsson
 Siddhartha Reddy Jonnalagadda
 Xi Cheng
 Raphael Hoffmann
-
 #### Curators and Editors
 Antonio Gulli
 Anant Nawalgaria
 Grace Mollison
-
 #### Technical Writer
 Joey Haymaker
-
 #### Designer
 Michael Lanning
 

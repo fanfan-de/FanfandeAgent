@@ -42,7 +42,7 @@ class LLM:
                 params["tools"] = tools
                 params["tool_choice"] = "auto" # 让模型自动决定是否调用
             print("\nAPI 接口函数的输入param\n-------------------------------------------------\n")
-            rprint(params)
+            #rprint(params)
             print("\n")
             print("\n发起请求\n")
             response = self.client.chat.completions.create(**params)

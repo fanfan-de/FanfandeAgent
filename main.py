@@ -30,12 +30,12 @@ async def run_agent_workflow():
     mcp_manager = MCPManager()
     await mcp_manager.start_servers()
 
-    rprint(await mcp_manager.get_combined_tools())
+    #rprint(await mcp_manager.get_combined_tools())
 
     tools =  await mcp_manager.get_combined_tools()
 
-    for tool in tools:
-        rprint(tool)
+    #for tool in tools:
+        #rprint(tool)
     available_tools = [{ 
         "type": "function",  #必须有这个字段
         "function":{
@@ -82,8 +82,9 @@ async def run_agent_workflow():
     # 3. Agent 决策循环 (简易版)
     while True:
         #LLM 生成 response
+        rprint(memory)
         llmmessage = llm.chat(memory.to_messages(),tools=available_tools)
-        rprint(llmmessage)
+        #rprint(llmmessage)
 
         memory.add(llmmessage)
         
@@ -91,7 +92,7 @@ async def run_agent_workflow():
         # 如果 LLM 不需要调用工具，直接输出结果并停止
         if  llmmessage.tool_calls == None or llmmessage.tool_calls == []:
 
-            print("\nAgent 回复:", llmmessage.content)
+            #print("\nAgent 回复:", llmmessage.content)
 
             #下一次输入
             user_input =input()
@@ -104,7 +105,7 @@ async def run_agent_workflow():
         for toolcall in  llmmessage.tool_calls:
             if toolcall.type == "function":
                 result = await mcp_manager.call_tool(tool_name=toolcall.function.name,arguments=json.loads(toolcall.function.arguments))
-                rprint(result)
+                #rprint(result)
                 memory.add(ToolMessage(content= result.content[0].text, tool_call_id=toolcall.id))   
         
         print(f"\n-----------------工具执行完毕,存入memory----------------------\n")

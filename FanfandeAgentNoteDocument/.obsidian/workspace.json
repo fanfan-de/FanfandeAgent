@@ -11,12 +11,14 @@
             "id": "0989587ac6e7fd0d",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "markdown",
               "state": {
-                "file": "22365_19_Agents_v8_images/page_28_img_1.png"
+                "file": "Embeddings & Vector Stores - 嵌入与向量存储.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-image",
-              "title": "page_28_img_1"
+              "icon": "lucide-file",
+              "title": "Embeddings & Vector Stores - 嵌入与向量存储"
             }
           },
           {
@@ -53,16 +55,15 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "FanfandeAgent-手搓AI-Agent开发日志（1）.md",
+                "file": "2026-01-05.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "FanfandeAgent-手搓AI-Agent开发日志（1）"
+              "title": "2026-01-05"
             }
           }
-        ],
-        "currentTab": 3
+        ]
       }
     ],
     "direction": "vertical"
@@ -119,8 +120,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 341.5,
-    "collapsed": true
+    "width": 341.5
   },
   "right": {
     "id": "5f7abf8d4e68168e",
@@ -175,7 +175,7 @@
                 "searchQuery": ""
               },
               "icon": "lucide-tags",
-              "title": "Tags"
+              "title": "标签"
             }
           },
           {
@@ -189,7 +189,7 @@
                 "searchQuery": ""
               },
               "icon": "lucide-archive",
-              "title": "All properties"
+              "title": "添加笔记属性"
             }
           },
           {
@@ -198,21 +198,31 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Welcome.md",
+                "file": "Embeddings & Vector Stores - 嵌入与向量存储.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Welcome"
+              "title": "Embeddings & Vector Stores - 嵌入与向量存储 的大纲"
+            }
+          },
+          {
+            "id": "40791b6c9255a900",
+            "type": "leaf",
+            "state": {
+              "type": "agent-chat-view",
+              "state": {},
+              "icon": "brain-cog",
+              "title": "Chat with agent"
             }
           }
-        ]
+        ],
+        "currentTab": 5
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -222,18 +232,28 @@
       "daily-notes:打开/创建今天的日记": false,
       "templates:插入模板": false,
       "command-palette:打开命令面板": false,
-      "bases:创建新数据库": false
+      "bases:创建新数据库": false,
+      "ai-agent:Chat with Agent": false
     }
   },
-  "active": "979ee2c926e16a15",
+  "active": "0989587ac6e7fd0d",
   "lastOpenFiles": [
+    "FanfandeAgent-手搓AI-Agent开发日志（1）.md",
+    "Embeddings & Vector Stores - 嵌入与向量存储.md",
+    "image3.md",
+    "Chats/chat-2026-01-05T09-27-49-587Z.md",
+    "Chats/chat-2026-01-05T09-26-41-719Z.md",
+    "Chats",
+    "image4.md",
+    "image2.md",
+    "image1.md",
+    "22365_19_Agents_v8_images/page_28_img_1.png",
+    "2026-01-05.md",
     "未命名.md",
     "项目文档.md",
     "Agents.md",
     "Architecture.md",
     "drawIO-第 2 页.png",
-    "Embeddings & Vector Stores - 嵌入与向量存储.md",
-    "FanfandeAgent-手搓AI-Agent开发日志（1）.md",
     "Agent-基本的结构.png",
     "未命名.base",
     "image15.md",
@@ -242,9 +262,6 @@
     "Pasted image 20251231150816.png",
     "Pasted image 20251229122039.png",
     "2025-12-29.md",
-    "image2.md",
-    "image1.md",
-    "22365_19_Agents_v8_images/page_28_img_1.png",
     "image7.md",
     "image12.md",
     "Skills/Skills.md",
@@ -259,11 +276,7 @@
     "image8.md",
     "image6.md",
     "image5.md",
-    "image4.md",
-    "image3.md",
     "22365_19_Agents_v8_images",
-    "Skills/Understand Skills.md",
-    "Skills/Untitled.md",
     "Skills/asd.py",
     "Skills",
     "Untitled"
