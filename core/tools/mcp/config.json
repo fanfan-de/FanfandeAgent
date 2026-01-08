@@ -1,13 +1,22 @@
 {
   "mcpServers": {
-    "excel": {
-    "command": "uvx",
-    "args": ["excel-mcp-server", "stdio"]
-    },
     "bash":{
     "command":"E:/Project/FanfandeAgent/.venv/Scripts/python.exe",
     "args": ["E:/Project/FanfandeAgent/core/tools/mcp/bash_mcp.py"]
-  }
+    },
+    "everything": {
+      "command": "npx.cmd",
+      "args": ["-y", "@modelcontextprotocol/server-everything"]
+    },
+   "filesystem": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"@modelcontextprotocol/server-filesystem",
+				"E:/Project/FanfandeAgent"
+			],
+			"type": "stdio"
+		}
   }
 
 }

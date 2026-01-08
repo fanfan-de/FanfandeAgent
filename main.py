@@ -34,8 +34,8 @@ async def run_agent_workflow():
 
     tools =  await mcp_manager.get_combined_tools()
 
-    #for tool in tools:
-        #rprint(tool)
+    for tool in tools:
+        rprint(tool)
     available_tools = [{ 
         "type": "function",  #必须有这个字段
         "function":{
