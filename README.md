@@ -5,20 +5,7 @@
 <br />
 <div align="center"
   <p align="center">
-  fanfande-agent 是一个旨在打破 AI 开发“黑盒焦虑”的极简框架。
-
-  在当前的 AI 开发中，许多框架（如 LangChain）虽然功能强大，但往往引入了过多的抽象层和不可见的“魔法”，导致开发者难以调试或进行底层优化。
-
-  本项目**拒绝任何除 LLM 本身以外的黑盒**，不依赖复杂的第三方生态。它从最底层的 Prompt Engineering 和逻辑循环开始，构建了一个基础且高可扩展的 Agent 架构，让你能够完全理解并掌控 AI 智能体是如何通过推理（Reasoning）来解决问题的。
-    <br />
-    <a href="https://github.com/github_username/repo_name"><strong>探索文档 »</strong></a>
-    <br />
-    <br />
-    <a href="https://github.com/github_username/repo_name">查看Demo</a>
-    ·
-    <a href="https://github.com/github_username/repo_name/issues">报告Bug</a>
-    ·
-    <a href="https://github.com/github_username/repo_name/issues">提出新特性</a>
+`Fanfande_Agent` 是一个追求**完全透明、无黑盒**的 AI Agent 极简实现。该项目拒绝除 LLM 和外部 MCP 服务以外的一切黑盒封装，旨在通过最底层的 Prompt Engineering 和逻辑循环，展现 AI Agent 是如何通过放大 LLM 的推理能力，在现实世界中解决问题的。
   </p>
 </div>
 
