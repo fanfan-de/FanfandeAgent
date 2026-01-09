@@ -16,7 +16,11 @@
 				"E:/Project/FanfandeAgent"
 			],
 			"type": "stdio"
-		}
+		},
+    "custom": {
+      "command": "E:/Project/FanfandeAgent/.venv/Scripts/python.exe",
+      "args": ["E:/Project/FanfandeAgent/core/tools/mcp/mcp_server.py"]
+    }
   }
 
 }

@@ -1,0 +1,4 @@
+--- Executing: powershell -command "Get-CimInstance Win32_Processor | Format-Table Name" ---
+Get-CimInstance Win32_Processor | Format-Table Name
+
+[Finished with code 0]
